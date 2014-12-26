@@ -21,6 +21,7 @@
 #define UIPCLIENT_H
 
 #include "ethernet_comp.h"
+#include "Print.h"
 #import "Client.h"
 #import "utility/mempool.h"
 
@@ -54,6 +55,9 @@ typedef struct {
   memhandle packets_in[UIP_SOCKET_NUMPACKETS];
   memhandle packets_out[UIP_SOCKET_NUMPACKETS];
   memaddress out_pos;
+#if UIP_CLIENT_TIMER >= 0
+  unsigned long timer;
+#endif
 } uip_userdata_t;
 
 class UIPClient : public Client {
@@ -76,6 +80,8 @@ public:
   int peek();
   void flush();
 
+  using Print::write;
+
 private:
   UIPClient(struct uip_conn *_conn);
   UIPClient(uip_userdata_t* conn_data);
@@ -88,7 +94,7 @@ private:
   static size_t _write(uip_userdata_t *,const uint8_t *buf, size_t size);
   static int _available(uip_userdata_t *);
 
-  static memhandle * _currentBlock(memhandle* blocks);
+  static uint8_t _currentBlock(memhandle* blocks);
   static void _eatBlock(memhandle* blocks);
   static void _flushBlocks(memhandle* blocks);
 
@@ -101,7 +107,6 @@ private:
 
   friend void uipclient_appcall(void);
 
-  static void uip_callback();
 };
 
 #endif
